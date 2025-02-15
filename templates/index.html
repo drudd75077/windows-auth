@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flask Azure AD Authentication</title>
+</head>
+<body>
+    <h1>Welcome to Flask Azure AD Authentication</h1>
+    {% if session.get("user") %}
+        <p>Hello, {{ session["user"]["name"] }}!</p>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+    {% endif %}
+</body>
+</html>
