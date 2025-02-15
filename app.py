@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, session, url_for
 import msal
 from dotenv import load_dotenv
 import os
-
+#test
 # Load environment variables from .flaskenv file
 load_dotenv()
 
