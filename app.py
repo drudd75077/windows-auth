@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, session, url_for
 import msal
 from dotenv import load_dotenv
 import os
+from flask_session import Session
 
 # Load environment variables from .flaskenv file
 load_dotenv()
@@ -9,6 +10,8 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 app.config['SERVER_NAME'] = os.getenv('SERVER_NAME')
+app.config['SESSION_FILE_DIR'] = os.getenv('SESSION_FILE_DIR')
+Session(app)
 
 # Configuration
 CLIENT_ID = os.getenv('CLIENT_ID')
