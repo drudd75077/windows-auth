@@ -24,7 +24,8 @@ SESSION_TYPE = 'filesystem'
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    user_info = session.get('user', {})
+    return render_template('index.html', user_info=user_info)
 
 @app.route('/login')
 def login():
