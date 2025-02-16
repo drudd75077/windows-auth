@@ -2,12 +2,13 @@ from flask import Flask, render_template, request, redirect, session, url_for
 import msal
 from dotenv import load_dotenv
 import os
-#test
+
 # Load environment variables from .flaskenv file
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
+app.config['SERVER_NAME'] = os.getenv('SERVER_NAME')
 
 # Configuration
 CLIENT_ID = os.getenv('CLIENT_ID')
@@ -28,6 +29,7 @@ def login():
 
 @app.route(REDIRECT_PATH)
 def authorized():
+    print(REDIRECT_PATH)
     try:
         cache = _load_cache()
         result = _build_msal_app(cache=cache).acquire_token_by_auth_code_flow(session.get("flow", {}), request.args)
@@ -53,9 +55,11 @@ def _build_msal_app(cache=None, authority=None):
         client_credential=CLIENT_SECRET, token_cache=cache)
 
 def _build_auth_code_flow(authority=None, scopes=None):
+    redirect_uri = url_for("authorized", _external=True)
+    print(f"Redirect URI: {redirect_uri}")  # Debug statement to print the redirect URI
     return _build_msal_app(authority=authority).initiate_auth_code_flow(
         scopes or [],
-        redirect_uri=url_for("authorized", _external=True))
+        redirect_uri=redirect_uri)
 
 def _load_cache():
     cache = msal.SerializableTokenCache()
