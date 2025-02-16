@@ -10,6 +10,7 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 app.config['SERVER_NAME'] = os.getenv('SERVER_NAME')
+app.config['SESSION_TYPE'] = os.getenv('SESSION_TYPE')
 app.config['SESSION_FILE_DIR'] = os.getenv('SESSION_FILE_DIR')
 Session(app)
 
