@@ -14,13 +14,13 @@
         <a href="{{ url_for('login') }}">Login</a>
     {% endif %}
     <h1>User Information</h1>
+    <p><strong>Email:</strong> {{ user_email }}</p>
     {% if user_info %}
         <ul>
             {% for key, value in user_info.items() %}
                 <li><strong>{{ key }}:</strong> {{ value }}</li>
             {% endfor %}
         </ul>
-        <a href="{{ url_for('logout') }}">Logout</a>
     {% else %}
         <p>No user information available. Please <a href="{{ url_for('login') }}">login</a>.</p>
     {% endif %}

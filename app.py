@@ -19,7 +19,7 @@ CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 AUTHORITY = os.getenv('AUTHORITY')
 REDIRECT_PATH = os.getenv('REDIRECT_PATH')
-SCOPE = [os.getenv('SCOPE')]
+SCOPE = os.getenv('SCOPE').split()
 SESSION_TYPE = 'filesystem'
 
 @app.route('/')
