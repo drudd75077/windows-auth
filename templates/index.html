@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Azure AD Authentication</title>
+    <title>Azure AD Authentication</title>
 </head>
 <body>
+    <!-- Flash Messages -->
     <div class="flash-messages">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -15,22 +16,22 @@
             {% endif %}
         {% endwith %}
     </div>
-    <h1>Welcome to Flask Azure AD Authentication</h1>
-    {% if user_id %}
-        <p><strong>User ID:</strong> {{ user_id }}</p>
-        <p><strong>Email:</strong> {{ user_email }}</p>
-        <a href="{{ url_for('logout') }}">Logout</a>
-    {% endif %}
-    {% if user_info %}
-        <h1>User Information</h1>
-        <p><strong>Email:</strong> {{ user_email }}</p>
-        <ul>
-            {% for key, value in user_info.items() %}
-                <li><strong>{{ key }}:</strong> {{ value }}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No user information available. Please <a href="{{ url_for('login') }}">login</a>.</p>
-    {% endif %}
+
+    <div class="user-info">
+        {% if user_oid %}
+            <h2>Welcome!</h2>
+            <div class="user-details">
+                <p>OID: {{ user_oid }}</p>
+                <p>Email: {{ user_email }}</p>
+            </div>
+            <div>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        {% else %}
+            <h2>Welcome to Azure AD Authentication</h2>
+            <p>Please log in to continue.</p>
+            <a href="{{ url_for('login') }}">Login</a>
+        {% endif %}
+    </div>
 </body>
 </html>
