@@ -6,6 +6,15 @@
     <title>Flask Azure AD Authentication</title>
 </head>
 <body>
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
     <h1>Welcome to Flask Azure AD Authentication</h1>
     {% if user_id %}
         <p><strong>User ID:</strong> {{ user_id }}</p>
