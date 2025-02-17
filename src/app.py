@@ -9,7 +9,7 @@ import requests
 from dotenv import load_dotenv
 import os
 from flask_session import Session
-from datetime import datetime, timezone
+
 
 # Load environment variables from .flaskenv file
 load_dotenv()
@@ -18,8 +18,8 @@ app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.secret_key = os.getenv('SECRET_KEY')
 
 # Set the server name explicitly to localhost:5000
-app.config['SERVER_NAME'] = 'localhost:5000'
-app.config['PREFERRED_URL_SCHEME'] = 'http'
+app.config['SERVER_NAME'] = os.getenv('SERVER_NAME')
+
 
 # Configure server-side session management
 app.config['SESSION_TYPE'] = os.getenv('SESSION_TYPE')
@@ -78,26 +78,21 @@ def authorized():
             return redirect(url_for('index'))
         
         claims = result.get('id_token_claims', {})
-        print("Claims received:", claims)  # Add this line to debug
-        
         oid = claims.get('oid')
         email = claims.get('preferred_username')
-        
-        # Try different possible claim names for first name
-        first_name = claims.get('given_name') or claims.get('name') or claims.get('givenname') or ''
-        print(f"First name found: {first_name}")  # Add this line to debug
+        # Get only the first name from the given_name claim
+        first_name = claims.get('given_name', '').split()[0]  # Take only the first word
         
         if not oid or not email:
             flash('Failed to get user information from authentication response', 'error')
             return redirect(url_for('index'))
         
-        # Store the user information in session
+        # Store only the essential user information in session
         session['user_oid'] = oid
         session['user_email'] = email
         session['first_name'] = first_name
         
-        # Add debug information to flash messages
-        flash(f'Successfully authenticated! First name: {first_name}', 'success')
+        flash('Successfully authenticated!', 'success')
         _save_cache(cache)
         
         return redirect(url_for('index'))

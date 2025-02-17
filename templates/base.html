@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Flask App{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
     <header>
         <nav>
-            <div>
+            <div class="nav-left">
                 <a href="{{ url_for('index') }}">Home</a>
             </div>
-            <div>
+            <div class="nav-right">
                 {% if user_oid %}
                     <a href="{{ url_for('logout') }}">Logout</a>
                 {% else %}
