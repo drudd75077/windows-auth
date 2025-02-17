@@ -78,20 +78,26 @@ def authorized():
             return redirect(url_for('index'))
         
         claims = result.get('id_token_claims', {})
+        print("Claims received:", claims)  # Add this line to debug
+        
         oid = claims.get('oid')
         email = claims.get('preferred_username')
-        # Get the first name from claims
-        first_name = claims.get('given_name', '')
+        
+        # Try different possible claim names for first name
+        first_name = claims.get('given_name') or claims.get('name') or claims.get('givenname') or ''
+        print(f"First name found: {first_name}")  # Add this line to debug
+        
         if not oid or not email:
             flash('Failed to get user information from authentication response', 'error')
             return redirect(url_for('index'))
         
         # Store the user information in session
-        session['user_oid'] = oid      # Added this line
-        session['user_email'] = email  # Added this line
+        session['user_oid'] = oid
+        session['user_email'] = email
         session['first_name'] = first_name
         
-        flash('Successfully authenticated!', 'success')
+        # Add debug information to flash messages
+        flash(f'Successfully authenticated! First name: {first_name}', 'success')
         _save_cache(cache)
         
         return redirect(url_for('index'))
