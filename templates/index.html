@@ -1,37 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Azure AD Authentication</title>
-</head>
-<body>
-    <!-- Flash Messages -->
-    <div class="flash-messages">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash {{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-    </div>
+{% extends "base.html" %}
 
-    <div class="user-info">
-        {% if user_oid %}
-            <h2>Welcome!</h2>
-            <div class="user-details">
-                <p>OID: {{ user_oid }}</p>
-                <p>Email: {{ user_email }}</p>
-            </div>
-            <div>
-                <a href="{{ url_for('logout') }}">Logout</a>
-            </div>
-        {% else %}
-            <h2>Welcome to Azure AD Authentication</h2>
-            <p>Please log in to continue.</p>
-            <a href="{{ url_for('login') }}">Login</a>
-        {% endif %}
-    </div>
-</body>
-</html>
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+<div>
+    <h1>Welcome to My Flask App</h1>
+</div>
+{% endblock %}

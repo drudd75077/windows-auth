@@ -33,13 +33,26 @@ AUTHORITY = os.getenv('AUTHORITY')
 REDIRECT_PATH = os.getenv('REDIRECT_PATH')
 SCOPE = os.getenv('SCOPE').split()  # Split the scopes into a list
 
+@app.before_request
+def before_request():
+    # Make user information available to all templates
+    if 'user_oid' in session:
+        g.user_oid = session['user_oid']
+        g.user_email = session['user_email']
+    else:
+        g.user_oid = None
+        g.user_email = None
+
+@app.context_processor
+def inject_user():
+    return dict(
+        user_oid=getattr(g, 'user_oid', None),
+        user_email=getattr(g, 'user_email', None)
+    )
+
 @app.route('/')
 def index():
-    user_oid = session.get('user_oid')    # Changed from user_id to user_oid
-    user_email = session.get('user_email')
-    return render_template('index.html', 
-                         user_oid=user_oid,  # Changed from user_id to user_oid
-                         user_email=user_email)
+    return render_template('index.html')
 
 @app.route('/login')
 def login():
