@@ -78,14 +78,22 @@ def authorized():
             return redirect(url_for('index'))
         
         claims = result.get('id_token_claims', {})
-        print("Claims received:", claims)  # Add this temporarily to debug
+        print("Claims received:", claims)  # Keep this for debugging
         
         oid = claims.get('oid')
         email = claims.get('preferred_username')
         
-        # More robust way to get first name
-        given_name = claims.get('given_name', '')
-        first_name = given_name.split()[0] if given_name else ''
+        # Try different name claims in order of preference
+        first_name = None
+        if claims.get('given_name'):
+            name_parts = claims['given_name'].split()
+            first_name = name_parts[0] if name_parts else ''
+        elif claims.get('name'):
+            name_parts = claims['name'].split()
+            first_name = name_parts[0] if name_parts else ''
+        else:
+            # If no name is found, use the part of email before @
+            first_name = email.split('@')[0] if email else ''
         
         if not oid or not email:
             flash('Failed to get user information from authentication response', 'error')
@@ -105,7 +113,7 @@ def authorized():
         flash(f'Authentication error: {str(e)}', 'error')
     except Exception as e:
         flash(f'Unexpected error during authentication: {str(e)}', 'error')
-        print("Full error details:", e)  # Add this temporarily to debug
+        print("Full error details:", e)  # Keep this for debugging
     
     return redirect(url_for('index'))
 
