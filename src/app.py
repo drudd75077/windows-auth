@@ -35,10 +35,10 @@ SCOPE = os.getenv('SCOPE').split()  # Split the scopes into a list
 
 @app.route('/')
 def index():
-    user_id = session.get('user_id')
+    user_oid = session.get('user_oid')    # Changed from user_id to user_oid
     user_email = session.get('user_email')
     return render_template('index.html', 
-                         user_id=user_id, 
+                         user_oid=user_oid,  # Changed from user_id to user_oid
                          user_email=user_email)
 
 @app.route('/login')
@@ -54,12 +54,10 @@ def authorized():
             session.get("flow", {}), request.args)
         
         if "error" in result:
-            # Format the error message
             error_msg = f"Authentication Error: {result.get('error')}"
             if 'error_description' in result:
                 error_msg += f" - {result.get('error_description')}"
             
-            # Flash the error message
             flash(error_msg, 'error')
             return redirect(url_for('index'))
         
@@ -69,6 +67,10 @@ def authorized():
         if not oid or not email:
             flash('Failed to get user information from authentication response', 'error')
             return redirect(url_for('index'))
+        
+        # Store the user information in session
+        session['user_oid'] = oid      # Added this line
+        session['user_email'] = email  # Added this line
         
         flash('Successfully authenticated!', 'success')
         _save_cache(cache)
