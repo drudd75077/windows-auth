@@ -3,7 +3,7 @@ Main module for the project.
 This contains all app configs and 
 routes for this flask app
 """
-from flask import Flask, render_template, request, redirect, session, url_for, flash
+from flask import Flask, render_template, request, redirect, session, url_for, flash, g
 import msal
 import requests
 from dotenv import load_dotenv
@@ -39,15 +39,18 @@ def before_request():
     if 'user_oid' in session:
         g.user_oid = session['user_oid']
         g.user_email = session['user_email']
+        g.first_name = session.get('first_name', '') 
     else:
         g.user_oid = None
         g.user_email = None
+        g.first_name = None
 
 @app.context_processor
 def inject_user():
     return dict(
         user_oid=getattr(g, 'user_oid', None),
-        user_email=getattr(g, 'user_email', None)
+        user_email=getattr(g, 'user_email', None),
+        first_name=getattr(g, 'first_name', None)
     )
 
 @app.route('/')
@@ -74,9 +77,11 @@ def authorized():
             flash(error_msg, 'error')
             return redirect(url_for('index'))
         
-        oid = result.get('id_token_claims', {}).get('oid')
-        email = result.get('id_token_claims', {}).get('preferred_username')
-        
+        claims = result.get('id_token_claims', {})
+        oid = claims.get('oid')
+        email = claims.get('preferred_username')
+        # Get the first name from claims
+        first_name = claims.get('given_name', '')
         if not oid or not email:
             flash('Failed to get user information from authentication response', 'error')
             return redirect(url_for('index'))
@@ -84,6 +89,7 @@ def authorized():
         # Store the user information in session
         session['user_oid'] = oid      # Added this line
         session['user_email'] = email  # Added this line
+        session['first_name'] = first_name
         
         flash('Successfully authenticated!', 'success')
         _save_cache(cache)
