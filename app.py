@@ -1,3 +1,8 @@
+"""
+Main module for the project.
+This contains all app configs and 
+routes for this flask app
+"""
 from flask import Flask, render_template, request, redirect, session, url_for, flash
 import msal
 import requests
