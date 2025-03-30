@@ -90,7 +90,7 @@ def username_password_login():
     if user and check_password_hash(user.password, password):
         session['user_oid'] = username  # Using username as the identifier
         session['user_email'] = username  # You might want to add an email field to your User model later
-        session['first_name'] = username  # You might want to add a name field to your User model later
+        session['first_name'] = user.first_name  # Get the actual first_name from the user record
         flash('Successfully authenticated!', 'success')
         return redirect(url_for('index'))
     else:
