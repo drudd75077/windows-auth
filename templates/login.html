@@ -4,14 +4,20 @@
 
 {% block content %}
 <div class="login-container">
-    <h2>Login</h2>
+    <p>
+        <button onclick="window.location.href='{{ url_for('azure_login') }}'">Single Sign-On</button>
+    </p>
+    <p> or </p>
+    <p> Sign-On with Username and Password </p>
     <form action="{{ url_for('username_password_login') }}" method="post">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required>
+        <p>
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
+        </p>
         <button type="submit">Login</button>
     </form>
-    <button onclick="window.location.href='{{ url_for('azure_login') }}'">Login with Azure</button>
+
 </div>
 {% endblock %}

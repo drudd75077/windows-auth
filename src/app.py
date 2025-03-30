@@ -6,6 +6,9 @@ routes for this flask app
 from flask import Flask, render_template, request, redirect, session, url_for, flash, g
 import msal
 import requests
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from werkzeug.security import generate_password_hash
 from dotenv import load_dotenv
 import os
 from flask_session import Session
@@ -16,10 +19,13 @@ load_dotenv()
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.secret_key = os.getenv('SECRET_KEY')
-
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 # Set the server name explicitly to localhost:5000
 app.config['SERVER_NAME'] = os.getenv('SERVER_NAME')
 
+from models import User
 
 # Configure server-side session management
 app.config['SESSION_TYPE'] = os.getenv('SESSION_TYPE')
@@ -56,6 +62,21 @@ def inject_user():
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/register')
+def register():
+    return render_template('register.html')
+
+@app.route('/register', methods=['POST'])
+def register_user():
+    username = request.form['username']
+    password = request.form['password']
+    hashed_password = generate_password_hash(password, method='sha256')
+    new_user = User(username=username, password=hashed_password)
+    db.session.add(new_user)
+    db.session.commit()
+    flash('User registered successfully!', 'success')
+    return redirect(url_for('index'))
 
 @app.route('/username_password_login', methods=['POST'])
 def username_password_login():
