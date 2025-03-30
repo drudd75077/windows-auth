@@ -7,7 +7,7 @@ from flask import Flask, render_template, request, redirect, session, url_for, f
 import msal
 import requests
 from flask_migrate import Migrate
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash 
 from dotenv import load_dotenv
 import os
 from flask_session import Session
@@ -73,8 +73,9 @@ def register():
 def register_user():
     username = request.form['username']
     password = request.form['password']
-    hashed_password = generate_password_hash(password, method='sha256')
-    new_user = User(username=username, password=hashed_password)
+    first_name = request.form['first_name']
+    hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+    new_user = User(username=username, password=hashed_password, first_name=first_name)
     db.session.add(new_user)
     db.session.commit()
     flash('User registered successfully!', 'success')
@@ -84,16 +85,17 @@ def register_user():
 def username_password_login():
     username = request.form['username']
     password = request.form['password']
-    # Add logic to authenticate using username and password
-    # For example:
-    # if authenticate(username, password):
-    #     session['user_oid'] = username  # Or some unique user identifier
-    #     flash('Successfully authenticated!', 'success')
-    #     return redirect(url_for('index'))
-    # else:
-    #     flash('Invalid username or password', 'error')
-    #     return redirect(url_for('login'))
-    pass
+    
+    user = User.query.filter_by(username=username).first()
+    if user and check_password_hash(user.password, password):
+        session['user_oid'] = username  # Using username as the identifier
+        session['user_email'] = username  # You might want to add an email field to your User model later
+        session['first_name'] = username  # You might want to add a name field to your User model later
+        flash('Successfully authenticated!', 'success')
+        return redirect(url_for('index'))
+    else:
+        flash('Invalid username or password', 'error')
+        return redirect(url_for('login'))
 
 @app.route('/login')
 def login():
