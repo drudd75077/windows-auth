@@ -6,7 +6,6 @@ routes for this flask app
 from flask import Flask, render_template, request, redirect, session, url_for, flash, g
 import msal
 import requests
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash
 from dotenv import load_dotenv
