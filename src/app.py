@@ -11,7 +11,7 @@ from werkzeug.security import generate_password_hash
 from dotenv import load_dotenv
 import os
 from flask_session import Session
-from models import db, User
+from .models import db, User
 
 
 # Load environment variables from .flaskenv file
