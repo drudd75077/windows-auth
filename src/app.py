@@ -91,6 +91,7 @@ def username_password_login():
         session['user_oid'] = username  # Using username as the identifier
         session['user_email'] = username  # You might want to add an email field to your User model later
         session['first_name'] = user.first_name  # Get the actual first_name from the user record
+        session['login_method'] = 'username_password'
         flash('Successfully authenticated!', 'success')
         return redirect(url_for('index'))
     else:
@@ -147,7 +148,7 @@ def authorized():
         session['user_oid'] = oid
         session['user_email'] = email
         session['first_name'] = first_name
-        
+        session['login_method'] = 'azure'
         flash('Successfully authenticated!', 'success')
         _save_cache(cache)
         
@@ -163,11 +164,17 @@ def authorized():
 
 @app.route('/logout')
 def logout():
+    login_method = session.get('login_method')
     session.clear()
     flash('You have been logged out successfully', 'success')
-    return redirect(
-        AUTHORITY + "/oauth2/v2.0/logout" +
-        "?post_logout_redirect_uri=" + url_for("index", _external=True))
+    if login_method == 'azure':
+        # For Azure logout, redirect to Azure logout page
+        return redirect(
+            AUTHORITY + "/oauth2/v2.0/logout" +
+            "?post_logout_redirect_uri=" + url_for("index", _external=True))
+    else:
+        # For username/password logout, just redirect to index
+        return redirect(url_for('index'))
 
 def _build_msal_app(cache=None, authority=None):
     return msal.ConfidentialClientApplication(
