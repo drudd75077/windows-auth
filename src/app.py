@@ -57,8 +57,27 @@ def inject_user():
 def index():
     return render_template('index.html')
 
+@app.route('/username_password_login', methods=['POST'])
+def username_password_login():
+    username = request.form['username']
+    password = request.form['password']
+    # Add logic to authenticate using username and password
+    # For example:
+    # if authenticate(username, password):
+    #     session['user_oid'] = username  # Or some unique user identifier
+    #     flash('Successfully authenticated!', 'success')
+    #     return redirect(url_for('index'))
+    # else:
+    #     flash('Invalid username or password', 'error')
+    #     return redirect(url_for('login'))
+    pass
+
 @app.route('/login')
 def login():
+    return render_template('login.html')
+
+@app.route('/azure_login')
+def azure_login():
     session["flow"] = _build_auth_code_flow(scopes=SCOPE)
     return redirect(session["flow"]["auth_uri"])
 
