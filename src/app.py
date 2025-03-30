@@ -12,6 +12,7 @@ from werkzeug.security import generate_password_hash
 from dotenv import load_dotenv
 import os
 from flask_session import Session
+from models import db, User
 
 
 # Load environment variables from .flaskenv file
@@ -20,12 +21,14 @@ load_dotenv()
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.secret_key = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-db = SQLAlchemy(app)
+
+#Initialize the db with the app
+db.init_app(app)
 migrate = Migrate(app, db)
 # Set the server name explicitly to localhost:5000
 app.config['SERVER_NAME'] = os.getenv('SERVER_NAME')
 
-from models import User
+
 
 # Configure server-side session management
 app.config['SESSION_TYPE'] = os.getenv('SESSION_TYPE')
