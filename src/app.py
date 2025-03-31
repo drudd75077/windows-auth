@@ -120,7 +120,7 @@ def authorized():
                 error_msg += f" - {result.get('error_description')}"
             
             flash(error_msg, 'error')
-            return redirect(url_for('index'))
+            return redirect(url_for('login'))
         
         claims = result.get('id_token_claims', {})
         print("Claims received:", claims)  # Keep this for debugging
@@ -128,27 +128,29 @@ def authorized():
         oid = claims.get('oid')
         email = claims.get('preferred_username')
         
-        # Try different name claims in order of preference
-        first_name = None
-        if claims.get('given_name'):
-            name_parts = claims['given_name'].split()
-            first_name = name_parts[0] if name_parts else ''
-        elif claims.get('name'):
-            name_parts = claims['name'].split()
-            first_name = name_parts[0] if name_parts else ''
-        else:
-            # If no name is found, use the part of email before @
-            first_name = email.split('@')[0] if email else ''
-        
         if not oid or not email:
             flash('Failed to get user information from authentication response', 'error')
-            return redirect(url_for('index'))
+            return redirect(url_for('login'))
+
+        # Check if a user exists with username matching the email
+        from sqlalchemy import select
+        user = db.session.execute(
+            select(User).filter_by(username=email)
+        ).scalar_one_or_none()
+
+        if not user:
+            flash('No local account found matching your Azure email. Please contact your administrator at admin@yourdomain.com to register.', 'error')
+            return redirect(url_for('login'))
         
-        # Store only the essential user information in session
+        # User found, use their information from our database
+        first_name = user.first_name
+        
+        # Store user information in session
         session['user_oid'] = oid
         session['user_email'] = email
         session['first_name'] = first_name
         session['login_method'] = 'azure'
+        session['user_id'] = user.id
         flash('Successfully authenticated!', 'success')
         _save_cache(cache)
         
@@ -160,7 +162,7 @@ def authorized():
         flash(f'Unexpected error during authentication: {str(e)}', 'error')
         print("Full error details:", e)  # Keep this for debugging
     
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 @app.route('/logout')
 def logout():

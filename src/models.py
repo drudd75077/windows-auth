@@ -1,3 +1,4 @@
+#always make models sqlalchemy 2.0 syntax
 from typing import Optional
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, Integer
