@@ -130,7 +130,7 @@ def authorized():
         
         if not oid or not email:
             flash('Failed to get user information from authentication response', 'error')
-            return redirect(url_for('login'))
+            return redirect(url_for('azure_logout'))
 
         # Check if a user exists with username matching the email
         from sqlalchemy import select
@@ -139,8 +139,11 @@ def authorized():
         ).scalar_one_or_none()
 
         if not user:
+            # Store the error message in session before logout
             flash('No local account found matching your Azure email. Please contact your administrator at admin@yourdomain.com to register.', 'error')
-            return redirect(url_for('login'))
+            # Store a flag in session to indicate we need to show the error
+            session['show_error_after_logout'] = True
+            return redirect(url_for('azure_logout'))
         
         # User found, use their information from our database
         first_name = user.first_name
@@ -158,25 +161,51 @@ def authorized():
         
     except ValueError as e:
         flash(f'Authentication error: {str(e)}', 'error')
+        return redirect(url_for('azure_logout'))
     except Exception as e:
         flash(f'Unexpected error during authentication: {str(e)}', 'error')
         print("Full error details:", e)  # Keep this for debugging
-    
-    return redirect(url_for('login'))
+        return redirect(url_for('azure_logout'))
 
+# Add new route for Azure logout process
+@app.route('/azure_logout')
+def azure_logout():
+    """Handle Azure logout process"""
+    # Keep the error message in a temporary variable if it exists
+    show_error = session.get('show_error_after_logout', False)
+    
+    # Clear the session but preserve flash messages
+    preserved_flashed_messages = []
+    with app.test_request_context():
+        # Get the messages before clearing session
+        preserved_flashed_messages = [msg for msg in session.get('_flashes', [])]
+    
+    # Clear session
+    session.clear()
+    
+    # If we had an error message to show, restore it after session clear
+    if show_error and preserved_flashed_messages:
+        # Restore the flash messages
+        with app.test_request_context():
+            for category, message in preserved_flashed_messages:
+                flash(message, category)
+    
+    # Redirect to Azure logout endpoint
+    return redirect(
+        AUTHORITY + "/oauth2/v2.0/logout" +
+        "?post_logout_redirect_uri=" + url_for("login", _external=True)
+    )
+
+# Update the regular logout route to handle both types of logout
 @app.route('/logout')
 def logout():
     login_method = session.get('login_method')
-    session.clear()
-    flash('You have been logged out successfully', 'success')
     if login_method == 'azure':
-        # For Azure logout, redirect to Azure logout page
-        return redirect(
-            AUTHORITY + "/oauth2/v2.0/logout" +
-            "?post_logout_redirect_uri=" + url_for("index", _external=True))
+        return redirect(url_for('azure_logout'))
     else:
-        # For username/password logout, just redirect to index
-        return redirect(url_for('index'))
+        session.clear()
+        flash('You have been logged out successfully', 'success')
+        return redirect(url_for('login'))
 
 def _build_msal_app(cache=None, authority=None):
     return msal.ConfidentialClientApplication(
