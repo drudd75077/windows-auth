@@ -8,6 +8,7 @@ import msal
 import requests
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash 
+from flask_wtf.csrf import CSRFProtect
 from dotenv import load_dotenv
 import os
 from flask_session import Session
@@ -20,7 +21,8 @@ load_dotenv()
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.secret_key = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-
+# Initialize CSRF protection
+csrf = CSRFProtect(app)
 #Initialize the db with the app
 db.init_app(app)
 migrate = Migrate(app, db)

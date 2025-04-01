@@ -8,6 +8,7 @@
     
     <!-- Initial username form -->
     <form id="usernameForm" class="login-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="form-group">
             <label for="username">Username:</label>
             <input type="text" 
@@ -25,6 +26,7 @@
             <label>Username: <span id="selected-username" class="font-weight-bold"></span></label>
         </div>
         <form id="passwordForm" action="{{ url_for('username_password_login') }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" id="password-username" name="username">
             <div class="form-group">
                 <label for="password">Password:</label>
@@ -60,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token() }}'
+                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
                 },
                 body: JSON.stringify({ username: username })
             });
