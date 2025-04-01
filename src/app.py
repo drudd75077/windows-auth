@@ -121,14 +121,12 @@ def azure_logout():
     session.clear()
     session['_flashes'] = temp_messages
     
-    # Redirect to Azure logout endpoint with login_hint
+    # Construct the Azure logout URL
     logout_url = (
         f"{AUTHORITY}/oauth2/v2.0/logout"
         f"?post_logout_redirect_uri={url_for('login', _external=True)}"
+        f"&id_token_hint={session.get('id_token', '')}"  # Add the ID token hint
     )
-    
-    if attempted_email:
-        logout_url += f"&login_hint={attempted_email}"
     
     return redirect(logout_url)
 
@@ -149,6 +147,9 @@ def authorized():
         
         claims = result.get('id_token_claims', {})
         print("Claims received:", claims)  # Keep this for debugging
+        
+        # Store the ID token for logout
+        session['id_token'] = result.get('id_token', '')
         
         oid = claims.get('oid')
         email = claims.get('preferred_username')
