@@ -47,18 +47,18 @@ def before_request():
     if 'user_oid' in session:
         g.user_oid = session['user_oid']
         g.user_email = session['user_email']
-        g.first_name = session.get('first_name', '') 
+        g.display_name = session.get('display_name', '')  # Updated from first_name to display_name
     else:
         g.user_oid = None
         g.user_email = None
-        g.first_name = None
+        g.display_name = None
 
 @app.context_processor
 def inject_user():
     return dict(
         user_oid=getattr(g, 'user_oid', None),
         user_email=getattr(g, 'user_email', None),
-        first_name=getattr(g, 'first_name', None)
+        display_name=getattr(g, 'display_name', None)  # Updated from first_name to display_name
     )
 
 @app.route('/')
@@ -73,10 +73,10 @@ def register():
 def register_user():
     username = request.form.get('username', '').strip()
     password = request.form.get('password', '').strip()
-    first_name = request.form.get('first_name', '').strip()
+    display_name = request.form.get('display_name', '').strip()
 
     # Validate input
-    is_valid, error_message = User.validate_registration(username, password, first_name)
+    is_valid, error_message = User.validate_registration(username, password, display_name)
     if not is_valid:
         flash(error_message, 'error')
         return redirect(url_for('register'))
@@ -89,7 +89,7 @@ def register_user():
 
     try:
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-        new_user = User(username=username, password=hashed_password, first_name=first_name)
+        new_user = User(username=username, password=hashed_password, display_name=display_name)
         db.session.add(new_user)
         db.session.commit()
         flash('User registered successfully!', 'success')
@@ -107,8 +107,8 @@ def username_password_login():
     user = User.query.filter_by(username=username).first()
     if user and check_password_hash(user.password, password):
         session['user_oid'] = username  # Using username as the identifier
-        session['user_email'] = username  # You might want to add an email field to your User model later
-        session['first_name'] = user.first_name  # Get the actual first_name from the user record
+        session['user_email'] = username  # You might want to add an email field later
+        session['display_name'] = user.display_name  # Updated from first_name to display_name
         session['login_method'] = 'username_password'
         flash('Successfully authenticated!', 'success')
         return redirect(url_for('index'))
@@ -190,7 +190,7 @@ def authorized():
             return redirect(url_for('azure_logout'))
         
         # User found, use their information from our database
-        first_name = user.first_name
+        display_name = user.display_name  # Updated from first_name to display_name
         
         # Clear the attempted_email since login was successful
         session.pop('attempted_email', None)
@@ -198,7 +198,7 @@ def authorized():
         # Store user information in session
         session['user_oid'] = oid
         session['user_email'] = email
-        session['first_name'] = first_name
+        session['display_name'] = display_name  # Updated from first_name to display_name
         session['login_method'] = 'azure'
         session['user_id'] = user.id
         flash('Successfully authenticated!', 'success')

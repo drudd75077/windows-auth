@@ -12,24 +12,24 @@ class User(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     username: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(120), nullable=False)
-    first_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    display_name: Mapped[str] = mapped_column(String(50), nullable=False)
     
     def __repr__(self) -> str:
         return f'<User {self.username}>'
 
     @staticmethod
-    def validate_registration(username: str, password: str, first_name: str) -> tuple[bool, str]:
+    def validate_registration(username: str, password: str, display_name: str) -> tuple[bool, str]:
         """Validate registration input fields"""
         if not username or not username.strip():
             return False, "Username is required"
         if not password or not password.strip():
             return False, "Password is required"
-        if not first_name or not first_name.strip():
-            return False, "First name is required"
+        if not display_name or not display_name.strip():
+            return False, "Display name is required"
         if len(username) > 80:
             return False, "Username must be less than 80 characters"
         if len(password) > 120:
             return False, "Password must be less than 120 characters"
-        if len(first_name) > 50:
-            return False, "First name must be less than 50 characters"
+        if len(display_name) > 50:
+            return False, "Display name must be less than 50 characters"
         return True, ""
