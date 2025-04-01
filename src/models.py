@@ -1,6 +1,7 @@
+from datetime import datetime
 from typing import Optional
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, Integer
+from sqlalchemy import String, DateTime, Integer, func
 from flask_sqlalchemy import SQLAlchemy
 
 # Initialize SQLAlchemy with type support
@@ -13,6 +14,24 @@ class User(db.Model):
     username: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(120), nullable=False)
     display_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now()
+    )
+    last_login: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now()
+    )
+    created_by: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    updated_by: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
     
     def __repr__(self) -> str:
         return f'<User {self.username}>'

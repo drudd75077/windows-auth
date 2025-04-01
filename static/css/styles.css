@@ -214,3 +214,49 @@ nav {
 #selected-username {
     font-weight: bold;
 }
+
+/* ... (keep your existing CSS) ... */
+
+/* Update/add these button-specific styles */
+.btn-block {
+    display: block;
+    width: 100%;
+    margin-left: 0;  /* Remove any margin that might affect alignment */
+    margin-right: 0;
+}
+
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.form-actions .btn {
+    margin: 0;  /* Remove any existing margins */
+}
+
+/* Remove the margin-left from .btn-secondary if it exists */
+.btn-secondary {
+    background-color: #6c757d;
+    border: 1px solid #545b62;
+    color: white;
+    /* Remove margin-left if it exists */
+    margin-left: 0;
+}
+
+/* Update hover states for better visual feedback */
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}
+
+.btn-secondary:hover {
+    background-color: #545b62;
+    border-color: #4e555b;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+    background-color: rgba(0,0,0,0.05);
+}

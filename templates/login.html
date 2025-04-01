@@ -33,82 +33,11 @@
                 <input type="password" id="password" name="password" required class="form-control">
             </div>
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Login with Password</button>
-                <a href="{{ url_for('azure_login') }}" class="btn btn-secondary">Login with Azure</a>
-                <button type="button" class="btn btn-link" onclick="resetLogin()">Back</button>
+                <button type="submit" class="btn btn-primary btn-block">Login with Password</button>
+                <a href="{{ url_for('azure_login') }}" class="btn btn-secondary btn-block">Single-Sign On</a>
+                <button type="button" class="btn btn-link btn-block" onclick="resetLogin()">Back</button>
             </div>
         </form>
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const usernameForm = document.getElementById('usernameForm');
-    const loginOptions = document.getElementById('loginOptions');
-    const selectedUsername = document.getElementById('selected-username');
-    const passwordUsername = document.getElementById('password-username');
-
-    usernameForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const username = document.getElementById('username').value.trim();
-        if (!username) {
-            showFlashMessage('Username is required', 'error');
-            return;
-        }
-
-        try {
-            const response = await fetch('{{ url_for("check_username") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
-                },
-                body: JSON.stringify({ username: username })
-            });
-
-            const data = await response.json();
-            
-            if (data.success) {
-                // Show login options
-                usernameForm.style.display = 'none';
-                loginOptions.style.display = 'block';
-                selectedUsername.textContent = username;
-                passwordUsername.value = username;
-            } else {
-                showFlashMessage(data.message || 'Invalid username', 'error');
-                resetLogin();
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showFlashMessage('An error occurred. Please try again.', 'error');
-        }
-    });
-});
-
-function resetLogin() {
-    document.getElementById('usernameForm').style.display = 'block';
-    document.getElementById('loginOptions').style.display = 'none';
-    document.getElementById('username').value = '';
-    document.getElementById('password').value = '';
-}
-
-function showFlashMessage(message, category) {
-    // Remove any existing flash messages
-    const existingFlashes = document.querySelectorAll('.flash');
-    existingFlashes.forEach(flash => flash.remove());
-
-    // Create new flash message
-    const flash = document.createElement('div');
-    flash.className = `flash ${category}`;
-    flash.textContent = message;
-
-    // Insert after header
-    const header = document.querySelector('header');
-    header.parentNode.insertBefore(flash, header.nextSibling);
-
-    // Optionally remove after some time
-    setTimeout(() => flash.remove(), 5000);
-}
-</script>
 {% endblock %}
