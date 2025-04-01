@@ -6,21 +6,50 @@
 
 <div class="register-container">
     <h2>Register</h2>
-    <form action="{{ url_for('register_user') }}" method="post">
+    <form action="{{ url_for('register_user') }}" method="post" class="registration-form">
         <div class="form-group">
             <label for="first_name">First Name:</label>
-            <input type="text" id="first_name" name="first_name" required>
+            <input type="text" 
+                   id="first_name" 
+                   name="first_name" 
+                   required 
+                   maxlength="50"
+                   pattern=".{1,50}"
+                   title="First name is required and must be less than 50 characters"
+                   value="{{ request.form.first_name }}"
+                   class="form-control">
+            <div class="error-message"></div>
         </div>
+        
         <div class="form-group">
             <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
+            <input type="text" 
+                   id="username" 
+                   name="username" 
+                   required 
+                   maxlength="80"
+                   pattern=".{1,80}"
+                   title="Username is required and must be less than 80 characters"
+                   value="{{ request.form.username }}"
+                   class="form-control">
+            <div class="error-message"></div>
         </div>
+        
         <div class="form-group">
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
+            <input type="password" 
+                   id="password" 
+                   name="password" 
+                   required 
+                   maxlength="120"
+                   pattern=".{1,120}"
+                   title="Password is required and must be less than 120 characters"
+                   class="form-control">
+            <div class="error-message"></div>
         </div>
-        <button type="submit">Register</button>
+        
+        <button type="submit" class="btn btn-primary">Register</button>
+        <a href="{{ url_for('login') }}" class="btn btn-secondary">Back to Login</a>
     </form>
-</div>
 
 {% endblock %}

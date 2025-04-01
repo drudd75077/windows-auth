@@ -71,15 +71,33 @@ def register():
 
 @app.route('/register', methods=['POST'])
 def register_user():
-    username = request.form['username']
-    password = request.form['password']
-    first_name = request.form['first_name']
-    hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-    new_user = User(username=username, password=hashed_password, first_name=first_name)
-    db.session.add(new_user)
-    db.session.commit()
-    flash('User registered successfully!', 'success')
-    return redirect(url_for('index'))
+    username = request.form.get('username', '').strip()
+    password = request.form.get('password', '').strip()
+    first_name = request.form.get('first_name', '').strip()
+
+    # Validate input
+    is_valid, error_message = User.validate_registration(username, password, first_name)
+    if not is_valid:
+        flash(error_message, 'error')
+        return redirect(url_for('register'))
+
+    # Check if username already exists
+    existing_user = User.query.filter_by(username=username).first()
+    if existing_user:
+        flash('Username already exists', 'error')
+        return redirect(url_for('register'))
+
+    try:
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+        new_user = User(username=username, password=hashed_password, first_name=first_name)
+        db.session.add(new_user)
+        db.session.commit()
+        flash('User registered successfully!', 'success')
+        return redirect(url_for('login'))
+    except Exception as e:
+        db.session.rollback()
+        flash('An error occurred during registration. Please try again.', 'error')
+        return redirect(url_for('register'))
 
 @app.route('/username_password_login', methods=['POST'])
 def username_password_login():

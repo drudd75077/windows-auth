@@ -1,4 +1,3 @@
-#always make models sqlalchemy 2.0 syntax
 from typing import Optional
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, Integer
@@ -17,3 +16,20 @@ class User(db.Model):
     
     def __repr__(self) -> str:
         return f'<User {self.username}>'
+
+    @staticmethod
+    def validate_registration(username: str, password: str, first_name: str) -> tuple[bool, str]:
+        """Validate registration input fields"""
+        if not username or not username.strip():
+            return False, "Username is required"
+        if not password or not password.strip():
+            return False, "Password is required"
+        if not first_name or not first_name.strip():
+            return False, "First name is required"
+        if len(username) > 80:
+            return False, "Username must be less than 80 characters"
+        if len(password) > 120:
+            return False, "Password must be less than 120 characters"
+        if len(first_name) > 50:
+            return False, "First name must be less than 50 characters"
+        return True, ""
