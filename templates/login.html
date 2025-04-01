@@ -4,23 +4,109 @@
 
 {% block content %}
 <div class="login-container">
-    <p>
-        <button onclick="window.location.href='{{ url_for('azure_login') }}'">Single Sign-On</button>
-    </p>
-    <p> or </p>
-    <p> Sign-On with Username and Password </p>
-    <form action="{{ url_for('username_password_login') }}" method="post">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-        <p>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-        </p>
-        <button type="submit">Login</button>
+    <h2>Login</h2>
+    
+    <!-- Initial username form -->
+    <form id="usernameForm" class="login-form">
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" 
+                   id="username" 
+                   name="username" 
+                   required
+                   class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Continue</button>
     </form>
 
-    <div class="register-link">
-        <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+    <!-- Password/Azure options (hidden by default) -->
+    <div id="loginOptions" class="login-form" style="display: none;">
+        <div class="form-group">
+            <label>Username: <span id="selected-username" class="font-weight-bold"></span></label>
+        </div>
+        <form id="passwordForm" action="{{ url_for('username_password_login') }}" method="post">
+            <input type="hidden" id="password-username" name="username">
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required class="form-control">
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Login with Password</button>
+                <a href="{{ url_for('azure_login') }}" class="btn btn-secondary">Login with Azure</a>
+                <button type="button" class="btn btn-link" onclick="resetLogin()">Back</button>
+            </div>
+        </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const usernameForm = document.getElementById('usernameForm');
+    const loginOptions = document.getElementById('loginOptions');
+    const selectedUsername = document.getElementById('selected-username');
+    const passwordUsername = document.getElementById('password-username');
+
+    usernameForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value.trim();
+        if (!username) {
+            showFlashMessage('Username is required', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch('{{ url_for("check_username") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ username: username })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                // Show login options
+                usernameForm.style.display = 'none';
+                loginOptions.style.display = 'block';
+                selectedUsername.textContent = username;
+                passwordUsername.value = username;
+            } else {
+                showFlashMessage(data.message || 'Invalid username', 'error');
+                resetLogin();
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showFlashMessage('An error occurred. Please try again.', 'error');
+        }
+    });
+});
+
+function resetLogin() {
+    document.getElementById('usernameForm').style.display = 'block';
+    document.getElementById('loginOptions').style.display = 'none';
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+}
+
+function showFlashMessage(message, category) {
+    // Remove any existing flash messages
+    const existingFlashes = document.querySelectorAll('.flash');
+    existingFlashes.forEach(flash => flash.remove());
+
+    // Create new flash message
+    const flash = document.createElement('div');
+    flash.className = `flash ${category}`;
+    flash.textContent = message;
+
+    // Insert after header
+    const header = document.querySelector('header');
+    header.parentNode.insertBefore(flash, header.nextSibling);
+
+    // Optionally remove after some time
+    setTimeout(() => flash.remove(), 5000);
+}
+</script>
 {% endblock %}

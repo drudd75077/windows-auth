@@ -3,7 +3,7 @@ Main module for the project.
 This contains all app configs and 
 routes for this flask app
 """
-from flask import Flask, render_template, request, redirect, session, url_for, flash, g
+from flask import Flask, render_template, request, redirect, session, url_for, flash, g, jsonify
 import msal
 import requests
 from flask_migrate import Migrate
@@ -98,22 +98,60 @@ def register_user():
         db.session.rollback()
         flash('An error occurred during registration. Please try again.', 'error')
         return redirect(url_for('register'))
+    
+@app.route('/check_username', methods=['POST'])
+def check_username():
+    try:
+        data = request.get_json()
+        username = data.get('username', '').strip()
+        
+        if not username:
+            return jsonify({
+                'success': False,
+                'message': 'Username is required'
+            }), 400
+        
+        # Check if user exists in database
+        user = User.query.filter_by(username=username).first()
+        
+        if not user:
+            return jsonify({
+                'success': False,
+                'message': 'This username is not registered. Please contact the website administrator to register.'
+            }), 404
+        
+        # User exists
+        return jsonify({
+            'success': True,
+            'message': 'Username found'
+        })
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred. Please try again.'
+        }), 500
 
 @app.route('/username_password_login', methods=['POST'])
 def username_password_login():
-    username = request.form['username']
-    password = request.form['password']
+    username = request.form.get('username', '').strip()
+    password = request.form.get('password', '').strip()
+    
+    if not username or not password:
+        flash('Both username and password are required', 'error')
+        return redirect(url_for('login'))
     
     user = User.query.filter_by(username=username).first()
+    
     if user and check_password_hash(user.password, password):
-        session['user_oid'] = username  # Using username as the identifier
-        session['user_email'] = username  # You might want to add an email field later
-        session['display_name'] = user.display_name  # Updated from first_name to display_name
+        session['user_oid'] = username
+        session['user_email'] = username
+        session['display_name'] = user.display_name
         session['login_method'] = 'username_password'
         flash('Successfully authenticated!', 'success')
         return redirect(url_for('index'))
     else:
-        flash('Invalid username or password', 'error')
+        flash('Invalid username or password. Please contact the website administrator to reset your password.', 'error')
         return redirect(url_for('login'))
 
 @app.route('/login')
