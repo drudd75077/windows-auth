@@ -31,7 +31,7 @@ class User(db.Model):
     )
     created_by: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
     updated_by: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
-    is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
+    is_active: Mapped[bool] = mapped_column(default=True, nullable=False, server_default="1")
     
     def __repr__(self) -> str:
         return f'<User {self.username}>'
